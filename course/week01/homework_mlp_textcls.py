@@ -57,10 +57,16 @@ def tokenize(text):
 # ----------------------------------------------------------------------
 def build_vocab(texts):
     # TODO: 初始化 vocab = {"<unk>": 0}
+    vocab = {"<unk>": 0}    
     # TODO: 遍历每个文本的 tokenize 结果，把没见过的字符加入词表
     #       新字符的序号 = len(vocab)（加在末尾）
+    for text in texts:
+        for ch in tokenize(text):
+            if ch not in vocab:
+                vocab[ch] = len(vocab) 
+    return vocab
     raise NotImplementedError
-
+    
 
 # ----------------------------------------------------------------------
 # 任务 2（热身）：文本 → 词袋向量（Bag of Words）
@@ -158,11 +164,11 @@ def positive_prf(y_true, y_pred):
 def main():
     train_texts, train_labels = make_dataset(400)
     val_texts, val_labels = make_dataset(100)
-
+    
     vocab = build_vocab(train_texts)                                   # 关 1
     assert vocab["<unk>"] == 0 and len(vocab) > 50, "任务 1 未通过"
     print(f"[关 1] 词表大小 = {len(vocab)}")
-
+    
     bow = text_to_bow(train_texts[0], vocab)                           # 关 2
     assert bow.shape == (len(vocab),) and bow.sum().item() == len(tokenize(train_texts[0])), "任务 2 未通过"
     X_train = torch.stack([text_to_bow(t, vocab) for t in train_texts])
