@@ -1,0 +1,5 @@
+# Windows + NVIDIA GPU 注意：直接 pip install torch 装的是 CPU 版！
+# 装 CUDA 版请用：
+#   pip install torch --index-url https://download.pytorch.org/whl/cu130
+# 验证：python -c "import torch; print(torch.cuda.is_available())"
+torch>=2.0
