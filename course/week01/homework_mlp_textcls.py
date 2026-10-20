@@ -56,17 +56,14 @@ def tokenize(text):
 # 为什么只用训练集？——提示：验证集里出现没见过的字符怎么办？(OOV 概念)
 # ----------------------------------------------------------------------
 def build_vocab(texts):
-    # TODO: 初始化 vocab = {"<unk>": 0}
+    # 初始化 vocab = {"<unk>": 0}
     vocab = {"<unk>": 0}    
-    # TODO: 遍历每个文本的 tokenize 结果，把没见过的字符加入词表
-    #       新字符的序号 = len(vocab)（加在末尾）
+    # 遍历每个文本的 tokenize 结果，把没见过的字符加入词表
     for text in texts:
         for ch in tokenize(text):
             if ch not in vocab:
                 vocab[ch] = len(vocab) 
-    return vocab
-    raise NotImplementedError
-    
+    return vocab    
 
 # ----------------------------------------------------------------------
 # 任务 2（热身）：文本 → 词袋向量（Bag of Words）
@@ -74,8 +71,15 @@ def build_vocab(texts):
 # OOV 字符计入 <unk>（0 号位）
 # ----------------------------------------------------------------------
 def text_to_bow(text, vocab):
-    # TODO: torch.zeros(len(vocab)) 建零向量
-    # TODO: 逐字符查词表计数，查不到的用 vocab["<unk>"]
+    # torch.zeros(len(vocab)) 建零向量
+    bow = torch.zeros(len(text))
+    chars = tokenize(text)
+    #  逐字符查词表计数，查不到的用 vocab["<unk>"]
+    for ch in chars:
+        if ch in vocab:
+            idx = vocab.get(ch,"<unk>")
+            bow[idx] += 1
+    return bow
     # 思考：BoW 丢掉了什么信息？（"很好"和"好很"在这个表示下有区别吗？）
     raise NotImplementedError
 
