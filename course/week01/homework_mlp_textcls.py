@@ -95,16 +95,22 @@ def init_params(V, H=32, C=2):
         b1 = torch.zeros(H, requires_grad=True)
     问题：W 为什么要 * 0.1？b 为什么初始化成 0？
     """
-    # TODO: 按提示创建 4 个参数并 return W1, b1, W2, b2
-    raise NotImplementedError
-
+    #  按提示创建 4 个参数并 return W1, b1, W2, b2
+    g = torch.Generator().manual_seed(0)
+    W1 = (torch.randn(V, H, generator=g) * 0.1).requires_grad_(True)
+    b1 = torch.zeros(H, requires_grad=True)
+    W2 = (torch.randn(H, C, generator=g) * 0.1).requires_grad_(True)
+    b2 = torch.zeros(C, requires_grad=True)
+    return W1, b1, W2, b2
 
 def mlp_forward(X, W1, b1, W2, b2):
     """X: [B, V] → 返回 logits: [B, 2]"""
-    # TODO: 第一层线性 + ReLU + 第二层线性
+    #  第一层线性 + ReLU + 第二层线性
     #       h = clamp_min(X @ W1 + b1, 0.0)
+    h = torch.clamp_min(X @ W1 + b1, 0.0)
+    logits = h @ W2 + b2
     #       logits = ?
-    raise NotImplementedError
+    return logits
 
 
 # ----------------------------------------------------------------------
