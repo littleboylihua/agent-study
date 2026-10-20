@@ -72,16 +72,14 @@ def build_vocab(texts):
 # ----------------------------------------------------------------------
 def text_to_bow(text, vocab):
     # torch.zeros(len(vocab)) 建零向量
-    bow = torch.zeros(len(text))
+    bow = torch.zeros(len(vocab))
     chars = tokenize(text)
     #  逐字符查词表计数，查不到的用 vocab["<unk>"]
     for ch in chars:
-        if ch in vocab:
-            idx = vocab.get(ch,"<unk>")
-            bow[idx] += 1
+        idx = vocab.get(ch,"<unk>")
+        bow[idx] += 1
     return bow
     # 思考：BoW 丢掉了什么信息？（"很好"和"好很"在这个表示下有区别吗？）
-    raise NotImplementedError
 
 
 # ----------------------------------------------------------------------
