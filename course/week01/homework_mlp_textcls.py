@@ -166,8 +166,8 @@ def train(X_train, y_train, X_val, y_val, params, lr=0.5, batch_size=16, epochs=
         X_train = X_train[perm] # 打乱顺序
         y_train = y_train[perm]
         for i in range(0, n, batch_size):
-            x_batch = X_train[i:batch_size]
-            y_batch = y_train[i:batch_size]    
+            x_batch = X_train[i:i+batch_size]
+            y_batch = y_train[i:i+batch_size]    
             logits = mlp_forward(x_batch,W1,b1,W2,b2)
             loss = my_cross_entropy(logits, y_batch)
             loss.backward()
@@ -189,10 +189,16 @@ def train(X_train, y_train, X_val, y_val, params, lr=0.5, batch_size=16, epochs=
 # 这个指标会在第 4-5 周的项目里反复出现，现在手算一遍印象最深
 # ----------------------------------------------------------------------
 def positive_prf(y_true, y_pred):
-    # TODO: tp = ((y_pred==1)&(y_true==1)).sum().item()，fp、fn 同理
-    # TODO: precision = tp/(tp+fp)，recall = tp/(tp+fn)，f1 = 2PR/(P+R)
+    #  tp = ((y_pred==1)&(y_true==1)).sum().item()，fp、fn 同理
+    #  precision = tp/(tp+fp)，recall = tp/(tp+fn)，f1 = 2PR/(P+R)
     # 注意分母为 0 的保护
-    raise NotImplementedError
+    tp = ((y_pred == 1) & (y_true == 1)).sum().item()
+    fp = ((y_pred == 1) & (y_true == 0)).sum().item()
+    fn = ((y_pred == 0) & (y_true == 1)).sum().item()
+    precision = tp / (tp + fp) if tp + fp else 0.0
+    recall = tp / (tp + fn) if tp + fn else 0.0
+    F1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
+    return precision, recall, F1
 
 
 # ----------------------------------------------------------------------
