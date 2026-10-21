@@ -106,10 +106,8 @@ def init_params(V, H=32, C=2):
 def mlp_forward(X, W1, b1, W2, b2):
     """X: [B, V] → 返回 logits: [B, 2]"""
     #  第一层线性 + ReLU + 第二层线性
-    #       h = clamp_min(X @ W1 + b1, 0.0)
     h = torch.clamp_min(X @ W1 + b1, 0.0)
     logits = h @ W2 + b2
-    #       logits = ?
     return logits
 
 
@@ -123,8 +121,16 @@ def mlp_forward(X, W1, b1, W2, b2):
 # 完成后 main 里会自动和 F.cross_entropy 对数，误差必须 < 1e-6
 # ----------------------------------------------------------------------
 def my_cross_entropy(logits, target):
-    # TODO: 实现三步
-    raise NotImplementedError
+    #稳定数值：每行减去该行最大值 
+    shifted = logits - logits.max(dim=1, keepdim=True).values #减去每行最大值，保证不溢出。dim = 表示按行取值，keepdim=Ture 保留格式
+    # 按行算log_softmax 交叉熵函数
+    sum_exp = torch.exp(shifted).sum(dim=1, keepdim=True) # 求总的exp值
+    log_softmax = shifted - torch.log(sum_exp)  # log(ecp(当前)/exp(总))数学公式里可以换为减去
+    # 求对应target位置的log概率，取负号，求均值
+    correct = log_softmax[torch.arange(logits.shape[0]), target]
+    loss = -correct.mean()
+    return loss
+
 
 
 # ----------------------------------------------------------------------
