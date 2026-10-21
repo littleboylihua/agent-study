@@ -139,10 +139,15 @@ def my_cross_entropy(logits, target):
 # ----------------------------------------------------------------------
 def evaluate(X, y, params):
     """返回 (准确率, 预测标签)。提醒：评估不需要梯度，用 torch.no_grad()。"""
-    
+    W1, b1, W2, b2 = params
+    with torch.no_grad():
+        logits = mlp_forward(X,W1, b1, W2, b2)
+        preds = logits.argmax(dim=1)
+        acc = (preds == y).float().mean() # preds == y ==> [1,0,1,0,1] ==》浮点数 求平均值 1+0+1+0+1/5
+    return acc, preds
 
 
-def train(X_train, y_train, X_val, y_val, params, lr=0.5, batch_size=16, epochs=8):
+def train(X_train, y_train, X_val, y_val, params, lr=0.5, batch_size=16, epochs=100):
     """mini-batch 训练。五步循环模板（把伪代码变成真代码）：
         每个 epoch：torch.randperm 打乱样本顺序
         每个批次：
@@ -154,20 +159,28 @@ def train(X_train, y_train, X_val, y_val, params, lr=0.5, batch_size=16, epochs=
         问题（自测题 1）：⑤ 如果忘写会发生什么？
     每轮结束打印：平均 loss、train_acc、val_acc
     """
+    W1, b1, W2, b2 = params
+    n = X_train.shape[0]
     for epoch in range(epochs):
-        W1,b1,W2,b2 = params
-        x_batch = X_train[0:batch_size]
-        y_batch = y_train[0:batch_size]    
-        logits = mlp_forward(x_batch,W1,b1,W2,b2)
-        loss = my_cross_entropy(logits, y_batch)
-        loss.backward()
-        with torch.no_grad():
-            W1 -= lr * W1.grad
-            b1 -= lr * b1.grad
-            W2 -= lr * W2.grad
-            b2 -= lr * b2.grad
-        W1.grad.zero_(), b1.grad.zero_(), W2.grad.zero_(), b2.grad.zero_()
-    
+        perm = torch.randperm(n)
+        X_train = X_train[perm] # 打乱顺序
+        y_train = y_train[perm]
+        for i in range(0, n, batch_size):
+            x_batch = X_train[i:batch_size]
+            y_batch = y_train[i:batch_size]    
+            logits = mlp_forward(x_batch,W1,b1,W2,b2)
+            loss = my_cross_entropy(logits, y_batch)
+            loss.backward()
+            with torch.no_grad():
+                W1 -= lr * W1.grad
+                b1 -= lr * b1.grad
+                W2 -= lr * W2.grad
+                b2 -= lr * b2.grad
+            W1.grad.zero_(), b1.grad.zero_(), W2.grad.zero_(), b2.grad.zero_()
+        if epoch % 20 == 0 :
+            train_acc, _ = evaluate(X_train, y_train,params)
+            val_acc, _ = evaluate(X_val, y_val, params)
+            print(f"epoch{epoch}:loss={loss.item():.4f} train_acc={train_acc:.3f} val_acc={val_acc:.3f}")
         
 
 # ----------------------------------------------------------------------
