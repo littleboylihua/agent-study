@@ -139,9 +139,7 @@ def my_cross_entropy(logits, target):
 # ----------------------------------------------------------------------
 def evaluate(X, y, params):
     """返回 (准确率, 预测标签)。提醒：评估不需要梯度，用 torch.no_grad()。"""
-    # TODO: forward → argmax → 与 y 比较求 mean
-    #       同时返回 argmax 结果（任务 6 要用）
-    raise NotImplementedError
+    
 
 
 def train(X_train, y_train, X_val, y_val, params, lr=0.5, batch_size=16, epochs=8):
@@ -156,9 +154,21 @@ def train(X_train, y_train, X_val, y_val, params, lr=0.5, batch_size=16, epochs=
         问题（自测题 1）：⑤ 如果忘写会发生什么？
     每轮结束打印：平均 loss、train_acc、val_acc
     """
-    # TODO: 实现训练循环，最后 return
-    raise NotImplementedError
-
+    for epoch in range(epochs):
+        W1,b1,W2,b2 = params
+        x_batch = X_train[0:batch_size]
+        y_batch = y_train[0:batch_size]    
+        logits = mlp_forward(x_batch,W1,b1,W2,b2)
+        loss = my_cross_entropy(logits, y_batch)
+        loss.backward()
+        with torch.no_grad():
+            W1 -= lr * W1.grad
+            b1 -= lr * b1.grad
+            W2 -= lr * W2.grad
+            b2 -= lr * b2.grad
+        W1.grad.zero_(), b1.grad.zero_(), W2.grad.zero_(), b2.grad.zero_()
+    
+        
 
 # ----------------------------------------------------------------------
 # 任务 6（选做）：正类（好评）的 Precision / Recall / F1
